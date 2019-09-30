@@ -25,7 +25,8 @@ const map = new ol.Map({
 });
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    document.getElementById("data_file").addEventListener("change", handleDataFileSelect, false);
+    document.getElementById("style_file").addEventListener("change", handleStyleFileSelect, false);
 
     for(let i = 0; i < relations.length; i++)
     {
@@ -34,32 +35,64 @@ window.addEventListener('DOMContentLoaded', (event) => {
         feature.set("admin_level", relations[i]["admin_level"], true);
         all_features.push(feature);
     }
-
-    //all_features[i].setStyle(new ol.style.Style({stroke: new ol.style.Stroke({color: "grey", width: 1}), fill: new ol.style.Fill({color: "rgba(0, 255, 0, 0.2)"})}));
 });
 
-function handleFileSelect(evt) {
+function handleDataFileSelect(evt) {
     const file = evt.target.files[0];
 
     const reader = new FileReader();
 
-    reader.addEventListener('load', function(e) {
+    reader.addEventListener("load", function(e) {
+        //clear features from vector source
+        const features = map.getLayers().getArray()[1].getSource().getFeatures();
+        for(let j = 0; j < features.length; j++){
+            features[i].unset("data", true);
+        }
         map.getLayers().getArray()[1].getSource().clear();
-        const requested_features = e.target.result.split("\n"); //TODO windows new line style \r\n
-        console.log(requested_features);
-        for(let i = 0; i < requested_features.length; i++){
+
+        //read rows from data file and add the requested features to vector source
+        const data_rows = e.target.result.split(/\r?\n/);
+        for(let i = 0; i < data_rows.length; i++){
+            const row = data_rows[i].split(";");
             for(let j = 0; j < all_features.length; j++){
-                if(all_features[j].get("name") == requested_features[i]){
+                if(all_features[j].get("name") == row[0]){
                     const feature = all_features[j];
                     const style = new ol.style.Style();
                     const stroke = new ol.style.Stroke({color: "grey", width: 2});
                     style.setStroke(stroke);
                     feature.setStyle(style);
+                    feature.set("data", row[1], true);
                     map.getLayers().getArray()[1].getSource().addFeature(feature);
                     break;
                 }
             }
         }
+    });
+
+    reader.readAsText(file);
+}
+
+function handleStyleFileSelect(evt) {
+    const file = evt.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.addEventListener("load", function(e) {
+        //read rows from style file and change fill colors for features in vector source
+        const style_rows = e.target.result.split(/\r?\n/);
+        for(let i = 0; i < style_rows.length; i++){
+            const row = style_rows[i].split(";");
+            const features = map.getLayers().getArray()[1].getSource().getFeatures();
+            for(let j = 0; j < features.length; j++){
+                if(features[j].get("data") > row[0] && features[j].get("data") <= row[1]){
+                    const fill = new ol.style.Fill({color: row[2]});
+                    features[j].getStyle().setFill(fill);
+                    break;
+                }
+            }
+        }
+
+        map.getLayers().getArray()[1].getSource().changed();
     });
 
     reader.readAsText(file);
