@@ -54,6 +54,7 @@ function handleDataFileSelect(evt) {
         const data_rows = e.target.result.split(/\r?\n/);
         for(let i = 0; i < data_rows.length; i++){
             const row = data_rows[i].split(";");
+            let found = false;
             for(let j = 0; j < all_features.length; j++){
                 if(all_features[j].get("name") == row[0]){
                     const feature = all_features[j];
@@ -63,8 +64,12 @@ function handleDataFileSelect(evt) {
                     feature.setStyle(style);
                     feature.set("data", row[1], true);
                     map.getLayers().getArray()[1].getSource().addFeature(feature);
+                    found = true;
                     break;
                 }
+            }
+            if(!found){
+                console.log("Unknown feature: " + row[0]);
             }
         }
     });
@@ -80,10 +85,10 @@ function handleStyleFileSelect(evt) {
     reader.addEventListener("load", function(e) {
         //read rows from style file and change fill colors for features in vector source
         const style_rows = e.target.result.split(/\r?\n/);
-        for(let i = 0; i < style_rows.length; i++){
-            const row = style_rows[i].split(";");
-            const features = map.getLayers().getArray()[1].getSource().getFeatures();
-            for(let j = 0; j < features.length; j++){
+        const features = map.getLayers().getArray()[1].getSource().getFeatures();
+        for(let j = 0; j < features.length; j++){
+            for(let i = 0; i < style_rows.length; i++){
+                const row = style_rows[i].split(";");
                 if(features[j].get("data") > row[0] && features[j].get("data") <= row[1]){
                     const fill = new ol.style.Fill({color: row[2]});
                     features[j].getStyle().setFill(fill);
