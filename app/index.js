@@ -25,8 +25,8 @@ const map = new ol.Map({
 });
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    document.getElementById("data_file").addEventListener("change", handleDataFileSelect, false);
-    document.getElementById("style_file").addEventListener("change", handleStyleFileSelect, false);
+    document.getElementById("data_file_input").addEventListener("change", handleDataFileSelect, false);
+    document.getElementById("style_file_input").addEventListener("change", handleStyleFileSelect, false);
 
     for(let i = 0; i < relations.length; i++)
     {
