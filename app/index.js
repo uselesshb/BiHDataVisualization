@@ -62,7 +62,7 @@ function handleDataFileSelect(evt) {
                     const stroke = new ol.style.Stroke({color: "grey", width: 2});
                     style.setStroke(stroke);
                     feature.setStyle(style);
-                    feature.set("data", row[1], true);
+                    feature.set("data", parseInt(row[1]), true);
                     map.getLayers().getArray()[1].getSource().addFeature(feature);
                     found = true;
                     break;
@@ -87,13 +87,20 @@ function handleStyleFileSelect(evt) {
         const style_rows = e.target.result.split(/\r?\n/);
         const features = map.getLayers().getArray()[1].getSource().getFeatures();
         for(let j = 0; j < features.length; j++){
+            let found = false;
             for(let i = 0; i < style_rows.length; i++){
                 const row = style_rows[i].split(";");
-                if(features[j].get("data") > row[0] && features[j].get("data") <= row[1]){
+                if(features[j].get("data") > parseInt(row[0]) && features[j].get("data") <= parseInt(row[1])){
+                    console.log(typeof(features[j].get("data")));
                     const fill = new ol.style.Fill({color: row[2]});
                     features[j].getStyle().setFill(fill);
+                    found = true;
                     break;
                 }
+            }
+            if(!found){
+                const fill = new ol.style.Fill({color: "rgba(0,0,0,1)"});
+                features[j].getStyle().setFill(fill);
             }
         }
 
