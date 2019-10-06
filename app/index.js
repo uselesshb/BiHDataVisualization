@@ -35,6 +35,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
         feature.set("admin_level", relations[i]["admin_level"], true);
         all_features.push(feature);
     }
+
+    map.getLayers().getArray()[1].getSource().addFeature(all_features[0]);
 });
 
 function handleDataFileSelect(evt) {
@@ -45,7 +47,7 @@ function handleDataFileSelect(evt) {
     reader.addEventListener("load", function(e) {
         //clear features from vector source
         const features = map.getLayers().getArray()[1].getSource().getFeatures();
-        for(let j = 0; j < features.length; j++){
+        for(let i = 0; i < features.length; i++){
             features[i].unset("data", true);
         }
         map.getLayers().getArray()[1].getSource().clear();
@@ -59,7 +61,7 @@ function handleDataFileSelect(evt) {
                 if(all_features[j].get("name") == row[0]){
                     const feature = all_features[j];
                     const style = new ol.style.Style();
-                    const stroke = new ol.style.Stroke({color: "grey", width: 2});
+                    const stroke = new ol.style.Stroke({color: "grey", width: 1.25});
                     style.setStroke(stroke);
                     feature.setStyle(style);
                     feature.set("data", parseInt(row[1]), true);
