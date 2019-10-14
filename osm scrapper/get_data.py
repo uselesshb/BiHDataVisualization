@@ -1,4 +1,4 @@
-#this script creates relations.js and nodes.js used by the application
+#this script creates areas.js and nodes.js used by the application
 
 
 import requests
@@ -15,12 +15,12 @@ def main():
     all_nodes = {}
     duplicate_nodes_count = [0]
 
-    with open("relations.js", "w") as outfile:
-        outfile.write("const relations=[")
+    with open("areas.js", "w") as outfile:
+        outfile.write("const areas=[")
 
     get_data(relations_list, all_nodes, duplicate_nodes_count)
 
-    with open("relations.js", "a") as outfile:
+    with open("areas.js", "a") as outfile:
         outfile.write("]")
 
     with open("nodes.js", "a") as outfile:
@@ -77,7 +77,7 @@ def get_data(relations_list, all_nodes, duplicate_nodes_count):
 
         json_data["polygons"] = polygons
 
-        with open("relations.js", "a", encoding="utf8") as outfile:
+        with open("areas.js", "a", encoding="utf8") as outfile:
             outfile.write("{name:\"" + json_data["name"] + "\", admin_level:" + json_data["admin_level"] + ", relation_id:" + json_data["relation_id"]  + ", parent_relation_id:" + json_data["parent_relation_id"]+ ",polygons:[")
             for polygon_idx, polygon in enumerate(json_data["polygons"]):
                 outfile.write("[[")

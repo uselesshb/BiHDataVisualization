@@ -28,11 +28,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById("data_file_input").addEventListener("change", handleDataFileSelect, false);
     document.getElementById("style_file_input").addEventListener("change", handleStyleFileSelect, false);
 
-    for(let i = 0; i < relations.length; i++)
+    for(let i = 0; i < areas.length; i++)
     {
-        const feature = new ol.Feature({geometry: new ol.geom.MultiPolygon(relations[i].polygons)});
-        feature.set("name", relations[i]["name"], true);
-        feature.set("admin_level", relations[i]["admin_level"], true);
+        const feature = new ol.Feature({geometry: new ol.geom.MultiPolygon(areas[i].polygons)});
+        feature.set("name", areas[i]["name"], true);
+        feature.set("admin_level", areas[i]["admin_level"], true);
         all_features.push(feature);
     }
 
