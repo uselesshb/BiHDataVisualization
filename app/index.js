@@ -25,9 +25,6 @@ const map = new ol.Map({
 });
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    document.getElementById("data_file_input").addEventListener("change", handleDataFileSelect, false);
-    document.getElementById("style_file_input").addEventListener("change", handleStyleFileSelect, false);
-
     for(let i = 0; i < areas.length; i++)
     {
         const feature = new ol.Feature({geometry: new ol.geom.MultiPolygon(areas[i].polygons)});
@@ -101,4 +98,13 @@ function clearFeatures(){
         features[i].unset("data", true);
     }
     map.getLayers().getArray()[1].getSource().clear();
+}
+
+function onStartButtonClick(){
+    const x = document.querySelector("#wizard");
+    if (x.style.display === "flex") {
+        x.style.display = "none";
+    } else {
+        x.style.display = "flex";
+    }
 }
