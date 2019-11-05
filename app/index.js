@@ -24,6 +24,17 @@ const map = new ol.Map({
     view: mapView
 });
 
+const currentWizardEnum = {
+    NONE: "none",
+    DATA: "data",
+    STYLE: "style"
+};
+
+let currentWizard = currentWizardEnum.NONE;
+
+const dataWizardTexts = [];
+const styleWizardTexts = [];
+
 window.addEventListener('DOMContentLoaded', (event) => {
     for(let i = 0; i < areas.length; i++)
     {
@@ -34,6 +45,16 @@ window.addEventListener('DOMContentLoaded', (event) => {
     }
 
     map.getLayers().getArray()[1].getSource().addFeature(all_features[0]);
+
+    let texts = document.querySelectorAll(".activate_on_data_wizard");
+    texts.forEach(element => {
+        dataWizardTexts.push(element);
+    });
+
+    texts = document.querySelectorAll(".activate_on_style_wizard");
+    texts.forEach(element => {
+        styleWizardTexts.push(element);
+    });
 });
 
 function handleDataFileSelect(evt) {
@@ -42,10 +63,10 @@ function handleDataFileSelect(evt) {
     Papa.parse(evt.target.files[0], {
         complete: function(results) {
             const data = results.data;
-            for(let i = 0; i < data.length; i++){
+            for(let i = 0; i < data.length; i++) {
                 let found = false;
-                for(let j = 0; j < all_features.length; j++){
-                    if(all_features[j].get("name") == data[i][0]){
+                for(let j = 0; j < all_features.length; j++) {
+                    if (all_features[j].get("name") == data[i][0]) {
                         const feature = all_features[j];
                         const style = new ol.style.Style();
                         const stroke = new ol.style.Stroke({color: "grey", width: 1.25});
@@ -57,7 +78,7 @@ function handleDataFileSelect(evt) {
                         break;
                     }
                 }
-                if(!found){
+                if (!found) {
                     console.log("Unknown feature: " + data[i][0]);
                 }
             }
@@ -71,17 +92,17 @@ function handleStyleFileSelect(evt) {
         complete: function(results) {
             const data = results.data;
             const features = map.getLayers().getArray()[1].getSource().getFeatures();
-            for(let j = 0; j < features.length; j++){
+            for(let j = 0; j < features.length; j++) {
                 let found = false;
-                for(let i = 0; i < data.length; i++){
-                    if(features[j].get("data") > parseInt(data[i][0]) && features[j].get("data") <= parseInt(data[i][1])){
+                for(let i = 0; i < data.length; i++) {
+                    if (features[j].get("data") > parseInt(data[i][0]) && features[j].get("data") <= parseInt(data[i][1])) {
                         const fill = new ol.style.Fill({color: data[i][2]});
                         features[j].getStyle().setFill(fill);
                         found = true;
                         break;
                     }
                 }
-                if(!found){
+                if (!found) {
                     const fill = new ol.style.Fill({color: "rgba(0,0,0,1)"});
                     features[j].getStyle().setFill(fill);
                 }
@@ -92,19 +113,59 @@ function handleStyleFileSelect(evt) {
     });
 }
 
-function clearFeatures(){
+function clearFeatures() {
     const features = map.getLayers().getArray()[1].getSource().getFeatures();
-    for(let i = 0; i < features.length; i++){
+    for(let i = 0; i < features.length; i++) {
         features[i].unset("data", true);
     }
     map.getLayers().getArray()[1].getSource().clear();
 }
 
-function onStartButtonClick(){
-    const x = document.querySelector("#wizard");
-    if (x.style.display === "flex") {
-        x.style.display = "none";
-    } else {
-        x.style.display = "flex";
+function onStartButtonClick() {
+    switch(currentWizard) {
+        case currentWizardEnum.NONE:
+            setCurrentWizard(currentWizardEnum.DATA);
+            break;
+        case currentWizardEnum.DATA:
+        case currentWizardEnum.STYLE:
+            setCurrentWizard(currentWizardEnum.NONE);
+            break;
+        default:
     }
+}
+
+function setCurrentWizard(wizard) {
+    currentWizard = wizard;
+    const x = document.querySelector("#wizard");
+    switch(currentWizard) {
+        case currentWizardEnum.NONE:
+            x.style.display = "none";
+
+            break;
+        case currentWizardEnum.DATA:
+            x.style.display = "flex";
+            break;
+        case currentWizardEnum.STYLE:
+            x.style.display = "flex";
+            break;
+        default:
+    }
+    setWizardTexts(currentWizard);
+}
+
+function setWizardTexts(wizard) {
+    dataWizardTexts.forEach(element => {
+        if (wizard == currentWizardEnum.DATA) {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    });
+    styleWizardTexts.forEach(element => {
+        if (wizard == currentWizardEnum.STYLE) {
+            element.style.display = "none";
+        } else {
+            element.style.display = "none";
+        }
+    });
 }

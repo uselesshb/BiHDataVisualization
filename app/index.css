@@ -14,19 +14,6 @@ html {
     left: 0.5%;
     width: 5%;
     height: 8%;
-
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: space-around;
-
-    background: #525151;
-    border:2px solid black;
-    border-radius: 10px;
-}
-#start_button_label {
-    font-family: Arial;
-    color: #f7f7f7;
 }
 #wizard {
     position: absolute;
@@ -35,7 +22,7 @@ html {
     width: 30%;
     height: 40%;
 
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
@@ -45,35 +32,52 @@ html {
     border-radius: 10px;
     box-shadow: 5px 5px #888888;
 }
-.file_input {
-    display: none;
-}
-#upload_data_button {
+#wizard_button {
     width: 25%;
     height: 5%;
+}
+#wizard_example {
+    display: flex;
+    flex-direction: column;
+}
+#wizard_example_title {
+    font-size: 12px;
+}
+#wizard_example_file {
+    display: flex;
+    flex-direction: column;
 
-    font-family: Arial;
-    color: #f7f7f7;
-    text-align: center;
+    background: #dddddd;
+    border:1px solid #9b9b9b;
+    border-style: dashed;
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    background: #525151; 
+    background: #525151;
     border:2px solid black;
     border-radius: 10px;
     padding: 5px 5px;
+
+    font-family: Arial;
+    color: #f7f7f7;
 }
-#upload_data_info {
+.info_text {
+    font-family: Arial;
+    font-weight: bold;
+    color: #525151;
+}
+.wizard_info {
     width: 80%;
-    font-family: Arial;
-    font-weight: bold;
-    color: #525151;
     text-align: center;
 }
-#upload_data_info_example {
-    font-family: Arial;
-    font-weight: bold;
-    color: #525151;
-    text-align: center;
+.file_input {
+    display: none;
 }
-#bordered {
+.bordered {
     border:1px solid black;
 }
