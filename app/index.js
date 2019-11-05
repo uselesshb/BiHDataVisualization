@@ -24,13 +24,13 @@ const map = new ol.Map({
     view: mapView
 });
 
-const currentWizardEnum = {
+const wizardType = {
     NONE: "none",
     DATA: "data",
     STYLE: "style"
 };
 
-let currentWizard = currentWizardEnum.NONE;
+let currentWizard = wizardType.NONE;
 
 const dataWizardTexts = [];
 const styleWizardTexts = [];
@@ -55,18 +55,27 @@ window.addEventListener('DOMContentLoaded', (event) => {
     texts.forEach(element => {
         styleWizardTexts.push(element);
     });
+
+    const input = document.querySelector("#wizard_file_input");
+    input.addEventListener('change', handleFileSelect);
 });
 
+function handleFileSelect(evt) {
+    if (currentWizard == wizardType.DATA) {
+        handleDataFileSelect(evt);
+    } else {
+        handleStyleFileSelect(evt);
+    }
+}
 function handleDataFileSelect(evt) {
     clearFeatures();
-
     Papa.parse(evt.target.files[0], {
         complete: function(results) {
             const data = results.data;
             for(let i = 0; i < data.length; i++) {
                 let found = false;
                 for(let j = 0; j < all_features.length; j++) {
-                    if (all_features[j].get("name") == data[i][0]) {
+                    if (data[i].length > 1 && all_features[j].get("name") == data[i][0]) {
                         const feature = all_features[j];
                         const style = new ol.style.Style();
                         const stroke = new ol.style.Stroke({color: "grey", width: 1.25});
@@ -82,6 +91,7 @@ function handleDataFileSelect(evt) {
                     console.log("Unknown feature: " + data[i][0]);
                 }
             }
+            setCurrentWizard(wizardType.STYLE);
         },
         delimiter: ";"
     });
@@ -92,22 +102,24 @@ function handleStyleFileSelect(evt) {
         complete: function(results) {
             const data = results.data;
             const features = map.getLayers().getArray()[1].getSource().getFeatures();
-            for(let j = 0; j < features.length; j++) {
+            for(let i = 0; i < features.length; i++) {
                 let found = false;
-                for(let i = 0; i < data.length; i++) {
-                    if (features[j].get("data") > parseInt(data[i][0]) && features[j].get("data") <= parseInt(data[i][1])) {
-                        const fill = new ol.style.Fill({color: data[i][2]});
-                        features[j].getStyle().setFill(fill);
+                for(let j = 0; j < data.length; j++) {
+                    if (data[j].length > 2 && features[i].get("data") > parseInt(data[j][0]) && features[i].get("data") <= parseInt(data[j][1])) {
+                        const fill = new ol.style.Fill({color: data[j][2]});
+                        features[i].getStyle().setFill(fill);
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
+                    console.log("No style for feature: " + features[i].get("name"));
                     const fill = new ol.style.Fill({color: "rgba(0,0,0,1)"});
-                    features[j].getStyle().setFill(fill);
+                    features[i].getStyle().setFill(fill);
                 }
             }
             map.getLayers().getArray()[1].getSource().changed();
+            setCurrentWizard(wizardType.NONE);
         },
         delimiter: ";"
     });
@@ -123,12 +135,12 @@ function clearFeatures() {
 
 function onStartButtonClick() {
     switch(currentWizard) {
-        case currentWizardEnum.NONE:
-            setCurrentWizard(currentWizardEnum.DATA);
+        case wizardType.NONE:
+            setCurrentWizard(wizardType.DATA);
             break;
-        case currentWizardEnum.DATA:
-        case currentWizardEnum.STYLE:
-            setCurrentWizard(currentWizardEnum.NONE);
+        case wizardType.DATA:
+        case wizardType.STYLE:
+            setCurrentWizard(wizardType.NONE);
             break;
         default:
     }
@@ -138,14 +150,13 @@ function setCurrentWizard(wizard) {
     currentWizard = wizard;
     const x = document.querySelector("#wizard");
     switch(currentWizard) {
-        case currentWizardEnum.NONE:
+        case wizardType.NONE:
             x.style.display = "none";
-
             break;
-        case currentWizardEnum.DATA:
+        case wizardType.DATA:
             x.style.display = "flex";
             break;
-        case currentWizardEnum.STYLE:
+        case wizardType.STYLE:
             x.style.display = "flex";
             break;
         default:
@@ -155,15 +166,15 @@ function setCurrentWizard(wizard) {
 
 function setWizardTexts(wizard) {
     dataWizardTexts.forEach(element => {
-        if (wizard == currentWizardEnum.DATA) {
+        if (wizard == wizardType.DATA) {
             element.style.display = "block";
         } else {
             element.style.display = "none";
         }
     });
     styleWizardTexts.forEach(element => {
-        if (wizard == currentWizardEnum.STYLE) {
-            element.style.display = "none";
+        if (wizard == wizardType.STYLE) {
+            element.style.display = "block";
         } else {
             element.style.display = "none";
         }
