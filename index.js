@@ -136,7 +136,6 @@ function handleDataFileSelect(evt) {
             else {
                 setCurrentWizard(wizardType.STYLE_ERROR);
             }
-            
         },
         delimiter: ";"
     });
@@ -180,7 +179,6 @@ function handleStyleFileSelect(evt) {
                     break;
                 }
             }
-
             if (file_valid) {
                 const features = map.getLayers().getArray()[1].getSource().getFeatures();
                 for(let i = 0; i < features.length; i++) {
@@ -212,7 +210,6 @@ function handleStyleFileSelect(evt) {
 }
 
 function clearFeatures() {
-    console.log("clear");
     const features = map.getLayers().getArray()[1].getSource().getFeatures();
     for(let i = 0; i < features.length; i++) {
         features[i].unset("data", true);
