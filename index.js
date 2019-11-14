@@ -62,7 +62,7 @@ window.addEventListener("click", function(e){
     //clicking outside the wizard or start button closes the wizard
     let wizard =  document.querySelector("#wizard");
     let startButton =  document.querySelector("#start_button");
-    if (!wizard.contains(e.target) && !startButton.contains(e.target)) {
+    if (!wizard.contains(e.target) && !startButton.contains(e.target) && currentWizard != wizardType.NONE) {
         setCurrentWizard(wizardType.NONE);
         clearTimeout(timeoutFunctionId);
         resetMap();
@@ -212,6 +212,7 @@ function handleStyleFileSelect(evt) {
 }
 
 function clearFeatures() {
+    console.log("clear");
     const features = map.getLayers().getArray()[1].getSource().getFeatures();
     for(let i = 0; i < features.length; i++) {
         features[i].unset("data", true);
@@ -227,6 +228,7 @@ function resetMap() {
 function onStartButtonClick() {
     if (currentWizard == wizardType.NONE) {
         setCurrentWizard(wizardType.DATA);
+        resetMap();
     }
 }
 
