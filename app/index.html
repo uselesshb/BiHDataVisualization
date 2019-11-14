@@ -15,20 +15,22 @@
     </div>
 
     <div id="wizard">
-        <label class="activate_on_data_wizard wizard_info info_text">Odaberite csv datoteku koja u jednom retku sadrži ime područja, te brojčanu vrijednost vezanu za područje odvojenu znakom ;</label>
-        <label class="activate_on_style_wizard wizard_info info_text">Odaberite csv datoteku koja u jednom retku sadrži početak raspona, kraj raspona, te rgba kod boje kojom želite obojati taj raspon</label>
+        <label class="script_activated data wizard_info info_text">Odaberite csv datoteku koja u jednom retku sadrži ime područja, te brojčanu vrijednost vezanu za područje odvojenu znakom ;</label>
+        <label class="script_activated style wizard_info info_text">Odaberite csv datoteku koja u jednom retku sadrži početak raspona, kraj raspona, te RGBA kod boje kojom želite obojati taj raspon (A vrijednost mora biti između 0 i 1)</label>
+        <label class="script_activated data_ok wizard_info info_text">Odabrana datoteka OK!</label>
+        <label class="script_activated data_error style_error wizard_info info_text" id="error_text">Greška!</label>
         <div id="wizard_example">
-            <label class="info_text" id="wizard_example_title">primjer.csv</label>
-            <div class="info_text" id="wizard_example_file">
-                <label class="activate_on_data_wizard">Grude;15000</label>
-                <label class="activate_on_data_wizard">Posušje;20000</label>
-                <label class="activate_on_data_wizard">Široki Brijeg;25000</label>
-                <label class="activate_on_style_wizard">0;18000;rgba(255,230,230,0.8)</label>
-                <label class="activate_on_style_wizard">18000;23000;rgba(255,204,204,0.8)</label>
-                <label class="activate_on_style_wizard">23000;30000;rgba(255,179,179,0.8)</label>
+            <label class="script_activated data style info_text" id="wizard_example_title">primjer.csv</label>
+            <div class="script_activated data style info_text" id="wizard_example_file">
+                <label class="script_activated data">Grude;15000</label>
+                <label class="script_activated data">Posušje;20000</label>
+                <label class="script_activated data">Široki Brijeg;25000</label>
+                <label class="script_activated style">0;18000;rgba(255,230,230,0.8)</label>
+                <label class="script_activated style">18000;23000;rgba(255,204,204,0.8)</label>
+                <label class="script_activated style">23000;30000;rgba(255,179,179,0.8)</label>
             </div>
         </div>
-        <label class="button" id="wizard_button" for="wizard_file_input">Odaberi datoteku</label>
+        <label class="script_activated data data_error style style_error button" id="wizard_button" for="wizard_file_input">Odaberi datoteku</label>
         <input type="file" accept=".csv" class="file_input" id="wizard_file_input"/>
     </div>
 

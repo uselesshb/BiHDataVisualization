@@ -27,13 +27,15 @@ const map = new ol.Map({
 const wizardType = {
     NONE: "none",
     DATA: "data",
-    STYLE: "style"
+    DATA_OK: "data_ok",
+    DATA_ERROR: "data_error",
+    STYLE: "style",
+    STYLE_ERROR: "style_error"
 };
 
 let currentWizard = wizardType.NONE;
 
-const dataWizardTexts = [];
-const styleWizardTexts = [];
+let timeoutFunctionId = 0;
 
 window.addEventListener('DOMContentLoaded', (event) => {
     //initialize all_features array using areas data
@@ -48,27 +50,33 @@ window.addEventListener('DOMContentLoaded', (event) => {
     //add the first feature (BiH) to map
     map.getLayers().getArray()[1].getSource().addFeature(all_features[0]);
 
-    //get dynamic labels
-    let texts = document.querySelectorAll(".activate_on_data_wizard");
-    texts.forEach(element => {
-        dataWizardTexts.push(element);
-    });
-
-    texts = document.querySelectorAll(".activate_on_style_wizard");
-    texts.forEach(element => {
-        styleWizardTexts.push(element);
-    });
-
     //add listener to "choose file" button
     const input = document.querySelector("#wizard_file_input");
-    input.addEventListener('change', handleFileSelect);
+    input.addEventListener("change", handleFileSelect);
 });
 
+window.addEventListener("click", function(e){  
+    //clicking outside the wizard or start button closes the wizard
+    let wizard =  document.querySelector("#wizard");
+    let startButton =  document.querySelector("#start_button");
+    if (!wizard.contains(e.target) && !startButton.contains(e.target)) {
+        setCurrentWizard(wizardType.NONE);
+        clearTimeout(timeoutFunctionId);
+        resetMap();
+    }
+  });
+
 function handleFileSelect(evt) {
-    if (currentWizard == wizardType.DATA) {
-        handleDataFileSelect(evt);
-    } else {
-        handleStyleFileSelect(evt);
+    switch(currentWizard) {
+        case wizardType.DATA:
+        case wizardType.DATA_ERROR:
+            handleDataFileSelect(evt);
+            break;
+        
+        case wizardType.STYLE:
+        case wizardType.STYLE_ERROR:
+            handleStyleFileSelect(evt);
+            break;
     }
 }
 function handleDataFileSelect(evt) {
@@ -76,9 +84,11 @@ function handleDataFileSelect(evt) {
     Papa.parse(evt.target.files[0], {
         complete: function(results) {
             const data = results.data;
+            let file_valid = true;
             for(let i = 0; i < data.length; i++) {
                 //validation check
                 let line_valid = false;
+                let error = "";
                 let line_data = data[i];
                 let feature;
                 if (line_data.length > 1) {
@@ -87,7 +97,16 @@ function handleDataFileSelect(evt) {
                         if (isValidInt(line_data[1])) {
                             line_valid = true;
                         }
+                        else {
+                            error = "Greška! U liniji " + (i+1).toString() + ": Nevažeći broj (" + line_data[1] + ")";
+                        }
                     }
+                    else {
+                        error = "Greška! U liniji " + (i+1).toString() + ": Nepoznato područje (" + line_data[0] + ")";
+                    }
+                }
+                else {
+                    error = "Greška! U liniji " + (i+1).toString() + ": Nedovoljan broj podataka, potrebno ime područja i brojčana vrijednost."
                 }
                 
                 if (line_valid) {
@@ -99,8 +118,22 @@ function handleDataFileSelect(evt) {
                     feature.set("data", parseInt(line_data[1]), true);
                     map.getLayers().getArray()[1].getSource().addFeature(feature);
                 }
+                else {
+                    file_valid = false;
+                    setErrorText(error);
+                    break;
+                }
             }
-            setCurrentWizard(wizardType.STYLE);
+            if (file_valid) {
+                setCurrentWizard(wizardType.DATA_OK);
+                timeoutFunctionId = setTimeout(() => {
+                    setCurrentWizard(wizardType.STYLE);
+                }, 2000);
+            }
+            else {
+                setCurrentWizard(wizardType.STYLE_ERROR);
+            }
+            
         },
         delimiter: ";"
     });
@@ -111,10 +144,11 @@ function handleStyleFileSelect(evt) {
         complete: function(results) {
             const data = results.data;
             //validation check
-            let lines_valid = true;
+            let file_valid = true;
             for(let i = 0; i < data.length; i++) {
                 let line_data = data[i];
                 let line_valid = false;
+                let error = "";
                 if(line_data.length > 2)
                 {
                     if (isValidInt(line_data[0])) {
@@ -122,16 +156,29 @@ function handleStyleFileSelect(evt) {
                             if (isValidRGBAValue(line_data[2])) {
                                 line_valid = true;
                             }
+                            else {
+                                error = "Greška! U liniji " + (i+1).toString() + ": Nevažeća RGBA vrijednost (" + line_data[2] + ")";
+                            }
+                        }
+                        else {
+                            error = "Greška! U liniji " + (i+1).toString() + ": Nevažeći broj (" + line_data[1] + ")";
                         }
                     }
+                    else {
+                        error = "Greška! U liniji " + (i+1).toString() + ": Nevažeći broj (" + line_data[0] + ")";
+                    }
+                }
+                else {
+                    error = "Greška! U liniji " + (i+1).toString() + ": Nedovoljan broj podataka, potreban početak raspona, kraj raspona i RGBA vrijednost."
                 }
                 if (!line_valid) {
-                    line_valid = false;
+                    file_valid = false;
+                    setErrorText(error);
                     break;
                 }
             }
 
-            if (lines_valid) {
+            if (file_valid) {
                 const features = map.getLayers().getArray()[1].getSource().getFeatures();
                 for(let i = 0; i < features.length; i++) {
                     let found = false;
@@ -153,6 +200,9 @@ function handleStyleFileSelect(evt) {
                 map.getLayers().getArray()[1].getSource().changed();
                 setCurrentWizard(wizardType.NONE);
             }
+            else {
+                setCurrentWizard(wizardType.STYLE_ERROR);
+            }
         },
         delimiter: ";"
     });
@@ -166,56 +216,45 @@ function clearFeatures() {
     map.getLayers().getArray()[1].getSource().clear();
 }
 
+function resetMap() {
+    clearFeatures();
+    map.getLayers().getArray()[1].getSource().addFeature(all_features[0]);
+}
+
 function onStartButtonClick() {
-    switch(currentWizard) {
-        case wizardType.NONE:
-            setCurrentWizard(wizardType.DATA);
-            break;
-        case wizardType.DATA:
-        case wizardType.STYLE:
-            setCurrentWizard(wizardType.NONE);
-            break;
-        default:
+    if (currentWizard == wizardType.NONE) {
+        setCurrentWizard(wizardType.DATA);
     }
 }
 
 function setCurrentWizard(wizard) {
-    currentWizard = wizard;
-    const x = document.querySelector("#wizard");
-    switch(currentWizard) {
-        case wizardType.NONE:
-            x.style.display = "none";
-            break;
-        case wizardType.DATA:
-            x.style.display = "flex";
-            break;
-        case wizardType.STYLE:
-            x.style.display = "flex";
-            break;
-        default:
+    if (currentWizard != wizard) {
+        currentWizard = wizard;
+        const x = document.querySelector("#wizard");
+        switch(currentWizard) {
+            case wizardType.NONE:
+                x.style.display = "none";
+                break;
+            case wizardType.DATA:
+            case wizardType.STYLE:
+                x.style.display = "flex";
+                break;
+            default:
+        }
+    
+        let scriptActivatedElements = x.querySelectorAll(".script_activated");
+        scriptActivatedElements.forEach(element => {
+            if (element.classList.contains(currentWizard)) {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
+        }); 
     }
-    setWizardTexts(currentWizard);
-}
-
-function setWizardTexts(wizard) {
-    dataWizardTexts.forEach(element => {
-        if (wizard == wizardType.DATA) {
-            element.style.display = "block";
-        } else {
-            element.style.display = "none";
-        }
-    });
-    styleWizardTexts.forEach(element => {
-        if (wizard == wizardType.STYLE) {
-            element.style.display = "block";
-        } else {
-            element.style.display = "none";
-        }
-    });
 }
 
 function isValidRGBAValue(s) {
-    const p = /rgba\((\d+),(\d+),(\d+),(\d\.\d+)\)/;
+    const p = /rgba\((\d+), ?(\d+), ?(\d+), ?(\d\.\d+)\)/;
     const result = s.match(p);
     if (result != null && result.length == 5) {
         let rgb_values_ok = true;
@@ -245,4 +284,9 @@ function isValidInt(s) {
         return true;
     }
     return false;
+}
+
+function setErrorText(error) {
+    const x = document.querySelector("#error_text");
+    x.innerHTML = error;
 }
