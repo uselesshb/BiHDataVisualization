@@ -131,7 +131,7 @@ function handleDataFileSelect(evt) {
                 setCurrentWizard(wizardType.DATA_OK);
                 timeoutFunctionId = setTimeout(() => {
                     setCurrentWizard(wizardType.STYLE);
-                }, 2000);
+                }, 1000);
             }
             else {
                 setCurrentWizard(wizardType.STYLE_ERROR);
