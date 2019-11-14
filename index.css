@@ -15,6 +15,21 @@ html {
     width: 5%;
     height: 8%;
 }
+#area_names_button {
+    position: absolute;
+    top: 20%;
+    left: 0.5%;
+    width: 5%;
+    height: 8%;
+}
+#area_names_text {
+    position: absolute;
+    top: 29.5%;
+    left: 0.8%;
+    width: 10%;
+    height: 50%;
+    display: none;
+}
 #wizard {
     position: absolute;
     top: 30%;

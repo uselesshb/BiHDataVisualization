@@ -39,12 +39,15 @@ let timeoutFunctionId = 0;
 
 window.addEventListener('DOMContentLoaded', (event) => {
     //initialize all_features array using areas data
+    let x = document.querySelector("#area_names_text");
     for(let i = 0; i < areas.length; i++)
     {
         const feature = new ol.Feature({geometry: new ol.geom.MultiPolygon(areas[i].polygons)});
         feature.set("name", areas[i].name, true);
         feature.set("admin_level", areas[i].admin_level, true);
         all_features.push(feature);
+
+        x.innerHTML = x.innerHTML + areas[i].name + "\n";
     }
 
     //add the first feature (BiH) to map
@@ -224,6 +227,16 @@ function resetMap() {
 function onStartButtonClick() {
     if (currentWizard == wizardType.NONE) {
         setCurrentWizard(wizardType.DATA);
+    }
+}
+
+function onAreaNamesButtonClick() {
+    let x = document.querySelector("#area_names_text");
+    if (x.style.display == "none" || x.style.display == "") {
+        x.style.display = "block";
+    }
+    else {
+        x.style.display = "none";
     }
 }
 
